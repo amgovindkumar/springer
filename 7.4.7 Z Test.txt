@@ -1,0 +1,19 @@
+import numpy as np
+from scipy import stats
+
+# Sample data (100 light bulbs, mean life = 1150 hours, std = 100 hours)
+sample_mean = 1150
+sample_size = 100
+sample_std = 100
+
+# Population mean
+population_mean = 1200
+
+# Calculate the Z-score
+z_score = (sample_mean - population_mean) / (sample_std / np.sqrt(sample_size))
+
+# Get the p-value
+p_value = stats.norm.sf(abs(z_score))  # two-tailed
+
+print("Z-score:", z_score)
+print("P-value:", p_value)

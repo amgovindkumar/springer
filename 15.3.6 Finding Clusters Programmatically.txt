@@ -1,0 +1,23 @@
+import pandas as pd
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
+# Load the dataset
+df = pd.read_csv('/content/customers_data_for_clustering.csv')
+
+# Selecting the features for clustering
+features = df[['NumberOfVisits', 'Spending']]
+
+# Using k-means clustering with 3 clusters
+kmeans = KMeans(n_clusters=3, random_state=0)
+kmeans.fit(features)
+
+# Adding the cluster labels to the original dataframe
+df['Cluster'] = kmeans.labels_
+
+# Plotting the clusters
+plt.scatter(df['NumberOfVisits'], df['Spending'], c=df['Cluster'], cmap='viridis')
+plt.xlabel('Number of Visits')
+plt.ylabel('Spending')
+plt.title('Customer Segments')
+plt.show()

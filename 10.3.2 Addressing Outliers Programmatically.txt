@@ -1,0 +1,56 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load the dataset
+df = pd.read_csv('/content/housing_data.csv')
+
+# Plotting box plots for 'price' and 'area' columns
+plt.figure(figsize=(12, 6))
+
+# Box plot for 'price'
+plt.subplot(1, 2, 1)
+sns.boxplot(x=df['price'])
+plt.title('Box Plot of Price')
+
+# Box plot for 'area'
+plt.subplot(1, 2, 2)
+sns.boxplot(x=df['area'])
+plt.title('Box Plot of Area')
+
+plt.tight_layout()
+plt.show()
+
+# Columns to check for outliers
+outlier_columns = ['price', 'area']
+
+# Calculate and print the percentage of outliers for 'price' and 'area' columns
+for column in outlier_columns:
+    Q1 = df[column].quantile(0.25)
+    Q3 = df[column].quantile(0.75)
+    IQR = Q3 - Q1
+    outlier_condition = (df[column] < (Q1 - 1.5 * IQR)) | (df[column] > (Q3 + 1.5 * IQR))
+    outliers_percentage = np.mean(outlier_condition) * 100
+    print(f'Percentage of outliers in {column}: {outliers_percentage:.2f}%')
+
+# Transform outliers using log transformation in 'price' and 'area' columns
+for column in outlier_columns:
+    df[column] = np.log1p(df[column])
+
+# Split data into training and testing sets
+X = df.drop('price', axis=1)
+y = df['price']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Fit the model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Predict and calculate R-squared
+y_pred = model.predict(X_test)
+r_squared = r2_score(y_test, y_pred)
+print(f'R-squared after transformation: {r_squared}')

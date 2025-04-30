@@ -1,0 +1,18 @@
+from scipy import stats
+
+# Sample data (25 students, mean score = 78, sample std = 10)
+sample_mean = 78
+sample_size = 25
+sample_std = 10
+
+# Population mean
+population_mean = 75
+
+# Calculate the t-score
+t_score = (sample_mean - population_mean) / (sample_std / np.sqrt(sample_size))
+
+# Get the p-value
+p_value = stats.t.sf(np.abs(t_score), df=sample_size-1) * 2  # two-tailed
+
+print("T-score:", t_score)
+print("P-value:", p_value)

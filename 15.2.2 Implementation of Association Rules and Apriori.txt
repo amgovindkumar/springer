@@ -1,0 +1,54 @@
+import pandas as pd
+from mlxtend.preprocessing import TransactionEncoder
+from mlxtend.frequent_patterns import apriori, association_rules
+import networkx as nx
+import matplotlib.pyplot as plt
+
+# Given transactions data
+transactions = [
+    ["egg", "sugar", "cheese", "coffee"],
+    ["egg", "sugar"],
+    ["egg", "coffee", "tea"],
+    ["egg", "sugar", "coffee", "tea"]
+]
+
+# One-hot encode the transaction data
+te = TransactionEncoder()
+te_ary = te.fit(transactions).transform(transactions)
+df_onehot = pd.DataFrame(te_ary, columns=te.columns_)
+
+# Applying the Apriori algorithm to find frequent itemsets
+frequent_itemsets = apriori(df_onehot, min_support=0.1, use_colnames=True)
+
+# Generating the association rules
+rules = association_rules(frequent_itemsets, metric="confidence", min_threshold=0.5)
+
+# Display top rules (sorted by lift)
+top_rules = rules.sort_values(by='lift', ascending=False).head()
+
+# Calculate overall support, confidence, and lift for 'egg', 'sugar', 'cheese', and 'coffee'
+overall_metrics = {}
+for item in ['egg', 'sugar', 'cheese', 'coffee']:
+    filtered_rules = rules[(rules['antecedents'].apply(lambda x: item in x)) |
+                           (rules['consequents'].apply(lambda x: item in x))]
+    overall_metrics[item] = {
+        'support': filtered_rules['support'].mean(),
+        'confidence': filtered_rules['confidence'].mean(),
+        'lift': filtered_rules['lift'].mean()
+    }
+
+# Create a network graph for visualization
+G = nx.Graph()
+for _, row in rules.iterrows():
+    antecedents = list(row['antecedents'])
+    consequents = list(row['consequents'])
+    for a in antecedents:
+        for c in consequents:
+            G.add_edge(a, c)
+
+# Draw the network graph
+nx.draw(G, with_labels=True, node_color='lightblue', font_size=10, node_size=2000)
+plt.show()
+
+# Output top rules and overall metrics
+top_rules, overall_metrics

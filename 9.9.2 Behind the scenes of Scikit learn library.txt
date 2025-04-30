@@ -1,0 +1,27 @@
+# Import Required Library
+import numpy as np
+
+# Define the Data Points
+X = np.array([[1, 1], [2, 1]])  # Independent variable (x) with a column of 1s for the intercept
+Y = np.array([2, 3])            # Dependent variable (y)
+
+# Calculate Transpose of X
+X_transpose = X.T
+
+# Calculate Product of X Transpose and X
+X_transpose_X = np.dot(X_transpose, X)
+
+# Calculate Inverse of the Product
+X_transpose_X_inv = np.linalg.inv(X_transpose_X)
+
+# Calculate Product of X Transpose and Y
+X_transpose_Y = np.dot(X_transpose, Y)
+
+# Compute Coefficients (a, b)
+coefficients = np.dot(X_transpose_X_inv, X_transpose_Y)
+a = coefficients[0]
+b = coefficients[1]
+
+# Print the results
+print(f"The slope (a) is: {a}")
+print(f"The y-intercept (b) is: {b}")

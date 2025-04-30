@@ -1,0 +1,83 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix, classification_report, roc_auc_score, roc_curve, accuracy_score
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder, StandardScaler
+import matplotlib.pyplot as plt
+
+# Load the dataset
+df = pd.read_csv('/content/housing_classification.csv')
+
+# Handling missing values
+df.fillna(df.median(), inplace=True)
+df.fillna(df.mode().iloc[0], inplace=True)
+
+# Encoding non-numeric data
+label_encoder = LabelEncoder()
+one_hot_encoder = OneHotEncoder()
+for column in df.select_dtypes(include=['object']).columns:
+    if column != 'Pricing':  # Exclude the target variable
+        if df[column].nunique() == 2:
+            df[column] = label_encoder.fit_transform(df[column])
+        else:
+            df = df.join(pd.get_dummies(df[column], prefix=column))
+            df.drop(column, axis=1, inplace=True)
+
+# Encode target variable
+df['Pricing'] = label_encoder.fit_transform(df['Pricing'])
+
+# Separate features and target variable
+X = df.drop('Pricing', axis=1)
+y = df['Pricing']
+
+# Splitting the dataset into the Training set and Test set
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+
+# Feature Scaling
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Fitting Logistic Regression to the Training set
+model = LogisticRegression(multi_class='multinomial', solver='lbfgs')
+model.fit(X_train, y_train)
+
+# Predicting the Test set results
+y_pred = model.predict(X_test)
+
+# Making the Confusion Matrix
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:")
+print(cm)
+
+# Classification report
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+
+# Computing ROC AUC
+y_prob = model.predict_proba(X_test)
+roc_auc = roc_auc_score(y_test, y_prob, multi_class='ovr')
+print("\nROC AUC Score:", roc_auc)
+
+# Plotting ROC curve
+fpr = {}
+tpr = {}
+thresh ={}
+n_class = 3
+
+for i in range(n_class):
+    fpr[i], tpr[i], thresh[i] = roc_curve(y_test, y_prob[:,i], pos_label=i)
+
+plt.plot(fpr[0], tpr[0], linestyle='--', color='orange', label='Class 0 vs Rest')
+plt.plot(fpr[1], tpr[1], linestyle='--', color='green', label='Class 1 vs Rest')
+plt.plot(fpr[2], tpr[2], linestyle='--', color='blue', label='Class 2 vs Rest')
+plt.title('Multiclass ROC curve')
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive rate')
+plt.legend(loc='best')
+plt.show()
+
+# Accuracy
+accuracy = accuracy_score(y_test, y_pred)
+print("\nAccuracy:", accuracy)

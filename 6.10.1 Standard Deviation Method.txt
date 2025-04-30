@@ -1,0 +1,6 @@
+lower_limit = df.mean() - 3*df.std()
+upper_limit = df.mean() + 3*df.std()
+print(lower_limit)
+print(upper_limit)
+df_filtered = df[(df['score'] > lower_limit) & (df['score'] < upper_limit)]
+print(df_filtered)

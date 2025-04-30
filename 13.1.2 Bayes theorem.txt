@@ -1,0 +1,15 @@
+# Initial probabilities
+P_A = 1/1000  # Probability of having the disease
+P_not_A = 999/1000  # Probability of not having the disease
+
+# Probabilities of test outcomes
+P_B_given_A = 0.99  # Probability of a positive test given having the disease (True Positive Rate)
+P_B_given_not_A = 0.05  # Probability of a positive test given not having the disease (False Positive Rate)
+
+# Overall probability of a positive test result (P(B))
+P_B = (P_B_given_A * P_A) + (P_B_given_not_A * P_not_A)
+print(P_B)
+
+# Applying Bayes' Theorem to calculate P(A|B): Probability of having the disease given a positive test result
+P_A_given_B = (P_B_given_A * P_A) / P_B
+print(P_A_given_B)

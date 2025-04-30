@@ -1,0 +1,48 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error, r2_score
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+
+# Load the dataset
+df = pd.read_csv('/content/housing_data.csv')
+
+# Assuming 'Price' is the dependent variable
+X = df.drop('price', axis=1)
+y = df['price']
+
+# Calculate VIF for each feature
+vif_data = pd.DataFrame()
+vif_data["feature"] = X.columns
+
+# Calculating VIF for each feature
+vif_data["VIF"] = [variance_inflation_factor(X.values, i) for i in range(len(X.columns))]
+
+print("VIF for each feature:\n", vif_data)
+
+# Identifying the feature with the highest VIF
+max_vif_feature = vif_data.sort_values(by="VIF", ascending=False).iloc[0]['feature']
+print("Removing feature due to high VIF:", max_vif_feature)
+
+# Remove the feature with the highest VIF
+X_new = X.drop(max_vif_feature, axis=1)
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X_new, y, test_size=0.2, random_state=42)
+
+# Create the Multiple Linear Regression model
+model = LinearRegression()
+
+# Fit the model with the training data
+model.fit(X_train, y_train)
+
+# Predict the prices on the test data
+y_pred = model.predict(X_test)
+
+# Calculate R^2 and MAE
+r_squared = r2_score(y_test, y_pred)
+mae = mean_absolute_error(y_test, y_pred)
+
+# Print the R^2 and MAE
+print(f'R^2: {r_squared}')
+print(f'MAE: {mae}')

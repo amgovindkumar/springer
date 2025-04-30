@@ -1,0 +1,43 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split, cross_val_score
+
+# Provided data
+area = np.array([1000, 1250, 1500, 1750, 2000, 2250, 2500, 2800, 3000, 3200]).reshape(-1, 1)
+price = np.array([300000, 400000, 500000, 600000, 700000, 800000, 850000, 910000, 950000, 920000])
+
+# Polynomial feature transformation
+degree = 2  # You can change the degree to see the effects
+poly_features = PolynomialFeatures(degree=degree)
+area_poly = poly_features.fit_transform(area)
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(area_poly, price, test_size=0.2, random_state=42)
+
+# Create a linear regression model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Evaluate the model
+train_error = mean_squared_error(y_train, model.predict(X_train))
+test_error = mean_squared_error(y_test, model.predict(X_test))
+cv_scores = cross_val_score(model, area_poly, price, cv=5, scoring='neg_mean_squared_error')
+
+# Print performance metrics
+print(f"Polynomial Degree: {degree}")
+print(f"Training Error: {train_error}")
+print(f"Test Error: {test_error}")
+print(f"Cross-validation Scores: {cv_scores}")
+print(f"Mean CV Score: {np.mean(cv_scores)}")
+
+# Plotting the results
+plt.scatter(area, price, color='blue', label='Actual Price')
+plt.plot(area, model.predict(area_poly), color='red', label='Predicted Price')
+plt.title('Polynomial Regression: Area vs Price')
+plt.xlabel('Area in Square Feet')
+plt.ylabel('Price')
+plt.legend()
+plt.show()

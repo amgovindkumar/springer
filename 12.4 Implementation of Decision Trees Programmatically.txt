@@ -1,0 +1,56 @@
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+import xgboost as xgb
+import matplotlib.pyplot as plt
+
+data = pd.read_csv('/content/predictive_maintenance_dataset.csv')
+
+# Split the data into training and testing sets
+X = data.drop('Failure', axis=1)
+y = data['Failure']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Initialize the models
+dt = DecisionTreeClassifier(random_state=42)
+rf = RandomForestClassifier(random_state=42)
+xg_clf = xgb.XGBClassifier(use_label_encoder=False, eval_metric='logloss')
+
+# Train the models
+dt.fit(X_train, y_train)
+rf.fit(X_train, y_train)
+xg_clf.fit(X_train, y_train)
+
+# Make predictions
+dt_predictions = dt.predict(X_test)
+rf_predictions = rf.predict(X_test)
+xg_predictions = xg_clf.predict(X_test)
+
+# Calculate the accuracies
+dt_accuracy = accuracy_score(y_test, dt_predictions)
+rf_accuracy = accuracy_score(y_test, rf_predictions)
+xg_accuracy = accuracy_score(y_test, xg_predictions)
+
+# Print the accuracies
+print('Decision Tree Accuracy:', dt_accuracy)
+print('Random Forest Accuracy:', rf_accuracy)
+print('XGBoost Accuracy:', xg_accuracy)
+
+# Plot the decision tree
+plt.figure(figsize=(20,10))
+plot_tree(dt, filled=True, feature_names=X.columns, class_names=['No Failure', 'Failure'])
+plt.title('Decision Tree')
+plt.show()
+
+# Plot one tree from the random forest
+plt.figure(figsize=(20,10))
+plot_tree(rf.estimators_[0], filled=True, feature_names=X.columns, class_names=['No Failure', 'Failure'])
+plt.title('One Tree from the Random Forest')
+plt.show()
+
+# Plot one tree from XGBoost
+plt.figure(figsize=(20,10))
+xgb.plot_tree(xg_clf, num_trees=0)
+plt.title('One Tree from XGBoost')
+plt.show()

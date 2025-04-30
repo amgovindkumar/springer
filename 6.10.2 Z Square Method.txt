@@ -1,0 +1,2 @@
+df['z_score'] = (df['score'] - df['score'].mean()) / df['score'].std()
+df.head()
